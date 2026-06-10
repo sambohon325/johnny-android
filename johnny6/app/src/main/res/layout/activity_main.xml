@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#0a0a14">
+
+    <!-- Dashboard panel — fixed 280dp width, just the buttons -->
+    <WebView
+        android:id="@+id/dashboardView"
+        android:layout_width="280dp"
+        android:layout_height="match_parent" />
+
+    <!-- YouTube panel — fills remaining width -->
+    <WebView
+        android:id="@+id/youtubeView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+</LinearLayout>

@@ -1,0 +1,8 @@
+R_DEF: Internal format may change without notice
+local
+id dashboardView
+id divider
+id youtubeView
+layout activity_main
+string app_name
+style AppTheme

@@ -1,0 +1,134 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.johnny6.riotdash.debug"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:5:5-67
+11-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:5:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:6:5-79
+12-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:6:22-76
+13    <uses-permission android:name="android.permission.CAMERA" />
+13-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:7:5-65
+13-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:7:22-62
+14    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+14-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:8:5-79
+14-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:8:22-76
+15    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+15-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:9:5-81
+15-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:9:22-78
+16    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+16-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:10:5-83
+16-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:10:22-80
+17
+18    <permission
+18-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+19        android:name="com.johnny6.riotdash.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+19-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+20        android:protectionLevel="signature" />
+20-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+21
+22    <uses-permission android:name="com.johnny6.riotdash.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+22-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+22-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+23
+24    <application
+24-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:12:5-47:19
+25        android:allowBackup="false"
+25-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:13:9-36
+26        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+26-->[androidx.core:core:1.9.0] C:\Users\sambo\.gradle\caches\transforms-3\543740e42155bb89dcbd6bdda0f43b68\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+27        android:debuggable="true"
+28        android:extractNativeLibs="true"
+29        android:hardwareAccelerated="true"
+29-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:19:9-43
+30        android:icon="@mipmap/ic_launcher"
+30-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:14:9-43
+31        android:label="Johnny 6"
+31-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:15:9-33
+32        android:roundIcon="@mipmap/ic_launcher_round"
+32-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:16:9-54
+33        android:supportsRtl="true"
+33-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:17:9-35
+34        android:theme="@style/AppTheme"
+34-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:18:9-40
+35        android:usesCleartextTraffic="true" >
+35-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:20:9-44
+36        <activity
+36-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:22:9-35:20
+37            android:name="com.johnny6.riotdash.MainActivity"
+37-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:23:13-41
+38            android:configChanges="orientation|screenSize|keyboardHidden"
+38-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:26:13-74
+39            android:exported="true"
+39-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:24:13-36
+40            android:launchMode="singleTop"
+40-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:27:13-43
+41            android:screenOrientation="landscape"
+41-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:25:13-50
+42            android:windowSoftInputMode="adjustPan" >
+42-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:28:13-52
+43            <intent-filter>
+43-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:29:13-34:29
+44                <action android:name="android.intent.action.MAIN" />
+44-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:30:17-69
+44-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:30:25-66
+45
+46                <category android:name="android.intent.category.LAUNCHER" />
+46-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:31:17-77
+46-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:31:27-74
+47                <category android:name="android.intent.category.HOME" />
+47-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:32:17-73
+47-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:32:27-70
+48                <category android:name="android.intent.category.DEFAULT" />
+48-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:33:17-76
+48-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:33:27-73
+49            </intent-filter>
+50        </activity>
+51
+52        <provider
+53            android:name="androidx.core.content.FileProvider"
+53-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:38:13-62
+54            android:authorities="com.johnny6.riotdash.debug.provider"
+54-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:39:13-60
+55            android:exported="false"
+55-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:40:13-37
+56            android:grantUriPermissions="true" >
+56-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:41:13-47
+57            <meta-data
+57-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:42:13-44:54
+58                android:name="android.support.FILE_PROVIDER_PATHS"
+58-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:43:17-67
+59                android:resource="@xml/file_paths" />
+59-->C:\Users\sambo\OneDrive\Documents\Johnny\johnny-android-git\johnny6\app\src\main\AndroidManifest.xml:44:17-51
+60        </provider>
+61        <provider
+61-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+62            android:name="androidx.startup.InitializationProvider"
+62-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+63            android:authorities="com.johnny6.riotdash.debug.androidx-startup"
+63-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+64            android:exported="false" >
+64-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+65            <meta-data
+65-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+66                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+66-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+67                android:value="androidx.startup" />
+67-->[androidx.emoji2:emoji2:1.2.0] C:\Users\sambo\.gradle\caches\transforms-3\78e0f475248ccf690a14f03fa1cc16c2\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+68            <meta-data
+68-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\sambo\.gradle\caches\transforms-3\a08e537b82c7c1ecb0346f490fbd9592\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+69                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+69-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\sambo\.gradle\caches\transforms-3\a08e537b82c7c1ecb0346f490fbd9592\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+70                android:value="androidx.startup" />
+70-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\sambo\.gradle\caches\transforms-3\a08e537b82c7c1ecb0346f490fbd9592\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+71        </provider>
+72    </application>
+73
+74</manifest>
