@@ -1,8 +1,11 @@
 R_DEF: Internal format may change without notice
 local
 id dashboardView
+id deviceIdText
+id waitingMessage
 id youtubeView
 layout activity_main
+layout activity_waiting
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name

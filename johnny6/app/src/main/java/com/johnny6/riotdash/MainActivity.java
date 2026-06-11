@@ -12,14 +12,17 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements HiveConnection.ProvisioningListener {
 
     private WebView dashboardView;
     private WebView youtubeView;
     private HiveConnection hiveConnection;
+    private DeviceIdentity identity;
 
     private static final String DASHBOARD_URL = "https://johnny6.sambohon.digital";
     private static final int PERMISSION_REQUEST_CODE = 100;
@@ -34,7 +37,41 @@ public class MainActivity extends AppCompatActivity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
         hideSystemUI();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        // ── Identity & registration ────────────────────────────────────────────
+        identity = new DeviceIdentity(this);
+        identity.registerWithHive(getAppVersion());
+
+        // ── Hive connection ────────────────────────────────────────────────────
+        requestPermissionsIfNeeded();
+        hiveConnection = new HiveConnection(this, identity, this);
+        hiveConnection.connect();
+
+        // ── Check for app updates ──────────────────────────────────────────────
+        new UpdateChecker(this).checkForUpdates();
+
+        // ── Show correct screen ────────────────────────────────────────────────
+        if (identity.isProvisioned()) {
+            showKioskScreen();
+        } else {
+            showWaitingScreen();
+        }
+    }
+
+    // ── Screens ────────────────────────────────────────────────────────────────
+
+    private void showWaitingScreen() {
+        setContentView(R.layout.activity_waiting);
+
+        TextView deviceIdText = findViewById(R.id.deviceIdText);
+        if (deviceIdText != null) {
+            deviceIdText.setText("Device ID: " + identity.getDeviceId());
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void showKioskScreen() {
         setContentView(R.layout.activity_main);
 
         dashboardView = findViewById(R.id.dashboardView);
@@ -43,10 +80,10 @@ public class MainActivity extends AppCompatActivity {
         setupWebView(dashboardView);
         setupWebView(youtubeView);
 
-        // Dashboard WebView — intercept every navigation attempt
         dashboardView.setWebViewClient(new WebViewClient() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            public boolean shouldOverrideUrlLoading(WebView view,
+                                                     WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 if (url.startsWith(DASHBOARD_URL)) return false;
                 youtubeView.loadUrl(url);
@@ -54,14 +91,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // YouTube panel — allow YouTube domains, block everything else
         youtubeView.setWebViewClient(new WebViewClient() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            public boolean shouldOverrideUrlLoading(WebView view,
+                                                     WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 if (url.contains("youtube.com") || url.contains("youtu.be")
-                        || url.contains("googlevideo.com") || url.contains("googleapis.com")
-                        || url.contains("accounts.google.com") || url.contains("google.com/accounts")) {
+                        || url.contains("googlevideo.com")
+                        || url.contains("googleapis.com")
+                        || url.contains("accounts.google.com")
+                        || url.contains("google.com/accounts")) {
                     return false;
                 }
                 return true;
@@ -70,16 +109,25 @@ public class MainActivity extends AppCompatActivity {
 
         dashboardView.loadUrl(DASHBOARD_URL);
         youtubeView.loadUrl("https://www.youtube.com");
+    }
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    // ── ProvisioningListener ───────────────────────────────────────────────────
 
-        // ── Hive connection ────────────────────────────────────────────────────
-        requestPermissionsIfNeeded();
-        hiveConnection = new HiveConnection(this);
-        hiveConnection.connect();
+    @Override
+    public void onProvisioned(String profileId, String role,
+                               String displayName, String location) {
+        // Hive just provisioned this device — load the right screen
+        runOnUiThread(() -> {
+            if ("kiosk".equals(role)) {
+                showKioskScreen();
+            }
+            // robot / wearable / drone screens: Phase 4
+        });
+    }
 
-        // ── Check for app updates silently on launch ───────────────────────────
-        new UpdateChecker(this).checkForUpdates();
+    @Override
+    public void onDeprovisioned() {
+        runOnUiThread(this::showWaitingScreen);
     }
 
     // ── Permissions ────────────────────────────────────────────────────────────
@@ -99,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
-
         if (needsRequest) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
         }
@@ -111,15 +158,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         hideSystemUI();
-        dashboardView.onResume();
-        youtubeView.onResume();
+        if (dashboardView != null) dashboardView.onResume();
+        if (youtubeView != null) youtubeView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        dashboardView.onPause();
-        youtubeView.onPause();
+        if (dashboardView != null) dashboardView.onPause();
+        if (youtubeView != null) youtubeView.onPause();
     }
 
     @Override
@@ -166,5 +213,14 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) hideSystemUI();
+    }
+
+    private String getAppVersion() {
+        try {
+            return getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "unknown";
+        }
     }
 }

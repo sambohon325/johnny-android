@@ -1,11 +1,8 @@
 package com.johnny6.riotdash;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -31,8 +28,6 @@ import androidx.core.app.ActivityCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -46,55 +41,71 @@ import okhttp3.WebSocketListener;
 public class HiveConnection {
 
     private static final String TAG = "HiveConnection";
-    private static final String DEVICE_ID = "johnny6";
-    private static final String HIVE_WS_URL = "wss://api.sambohon.digital/ws/device/" + DEVICE_ID;
+    private static final String HIVE_WS_BASE = "wss://api.sambohon.digital/ws/device/";
     private static final int HEARTBEAT_INTERVAL_MS = 60_000;
     private static final int RECONNECT_DELAY_MS = 10_000;
 
     private final Context context;
+    private final DeviceIdentity identity;
+    private final ProvisioningListener provisioningListener;
     private OkHttpClient client;
     private WebSocket webSocket;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean intentionalClose = false;
 
-    public HiveConnection(Context context) {
+    // ── Listener interface ─────────────────────────────────────────────────────
+
+    public interface ProvisioningListener {
+        void onProvisioned(String profileId, String role, String displayName, String location);
+        void onDeprovisioned();
+    }
+
+    // ── Constructor ────────────────────────────────────────────────────────────
+
+    public HiveConnection(Context context, DeviceIdentity identity,
+                          ProvisioningListener listener) {
         this.context = context.getApplicationContext();
-        client = new OkHttpClient.Builder()
+        this.identity = identity;
+        this.provisioningListener = listener;
+        this.client = new OkHttpClient.Builder()
                 .pingInterval(30, TimeUnit.SECONDS)
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(0, TimeUnit.SECONDS)
                 .build();
     }
 
+    // ── Connect ────────────────────────────────────────────────────────────────
+
     public void connect() {
         intentionalClose = false;
-        Request request = new Request.Builder()
-                .url(HIVE_WS_URL)
-                .build();
+        String wsUrl = HIVE_WS_BASE + identity.getDeviceId();
+        Request request = new Request.Builder().url(wsUrl).build();
 
         webSocket = client.newWebSocket(request, new WebSocketListener() {
 
             @Override
             public void onOpen(@NonNull WebSocket ws, @NonNull Response response) {
-                Log.i(TAG, "Connected to Hive");
+                Log.i(TAG, "Connected to Hive as " + identity.getDeviceId());
                 sendHeartbeat();
                 scheduleHeartbeat();
             }
 
             @Override
             public void onMessage(@NonNull WebSocket ws, @NonNull String text) {
-                Log.d(TAG, "Command received: " + text);
+                Log.d(TAG, "Command: " + text);
                 handleCommand(text);
             }
 
             @Override
-            public void onFailure(@NonNull WebSocket ws, @NonNull Throwable t, Response response) {
+            public void onFailure(@NonNull WebSocket ws, @NonNull Throwable t,
+                                  Response response) {
                 Log.w(TAG, "Hive connection failed: " + t.getMessage());
                 scheduleReconnect();
             }
 
             @Override
-            public void onClosed(@NonNull WebSocket ws, int code, @NonNull String reason) {
+            public void onClosed(@NonNull WebSocket ws, int code,
+                                 @NonNull String reason) {
                 Log.i(TAG, "Hive connection closed: " + reason);
                 if (!intentionalClose) scheduleReconnect();
             }
@@ -106,6 +117,8 @@ public class HiveConnection {
         mainHandler.removeCallbacksAndMessages(null);
         if (webSocket != null) webSocket.close(1000, "App closing");
     }
+
+    // ── Heartbeat ──────────────────────────────────────────────────────────────
 
     private void scheduleHeartbeat() {
         mainHandler.postDelayed(() -> {
@@ -120,6 +133,8 @@ public class HiveConnection {
             msg.put("type", "heartbeat");
             msg.put("battery", getBatteryPercent());
             msg.put("apk_version", getAppVersion());
+            msg.put("profile_id", identity.getProfileId());
+            msg.put("role", identity.getRole());
 
             Location loc = getLastLocation();
             if (loc != null) {
@@ -128,11 +143,12 @@ public class HiveConnection {
             }
 
             send(msg.toString());
-            Log.d(TAG, "Heartbeat sent");
         } catch (JSONException e) {
-            Log.e(TAG, "Heartbeat JSON error: " + e.getMessage());
+            Log.e(TAG, "Heartbeat error: " + e.getMessage());
         }
     }
+
+    // ── Command handler ────────────────────────────────────────────────────────
 
     private void handleCommand(String text) {
         try {
@@ -140,6 +156,30 @@ public class HiveConnection {
             String command = cmd.optString("command", "");
 
             switch (command) {
+
+                // ── Provisioning ───────────────────────────────────────────────
+                case "provisioned":
+                    String profileId   = cmd.optString("profile_id");
+                    String role        = cmd.optString("role", "kiosk");
+                    String displayName = cmd.optString("display_name");
+                    String location    = cmd.optString("location");
+                    identity.applyProvisioning(profileId, role, displayName, location);
+                    if (provisioningListener != null) {
+                        mainHandler.post(() ->
+                            provisioningListener.onProvisioned(
+                                profileId, role, displayName, location)
+                        );
+                    }
+                    break;
+
+                case "deprovisioned":
+                    identity.clearProvisioning();
+                    if (provisioningListener != null) {
+                        mainHandler.post(() -> provisioningListener.onDeprovisioned());
+                    }
+                    break;
+
+                // ── Kiosk commands ─────────────────────────────────────────────
                 case "take_photo_front":
                     capturePhoto(true);
                     break;
@@ -150,8 +190,32 @@ public class HiveConnection {
                     sendLocation();
                     break;
                 case "push_config":
-                    Log.i(TAG, "push_config received — dashboard will reload on next poll");
+                    Log.i(TAG, "push_config received");
                     break;
+
+                // ── Robot commands (Phase 4) ───────────────────────────────────
+                case "robot_deploy":
+                case "robot_dock":
+                case "motor_control":
+                case "speak":
+                    Log.i(TAG, "Robot command received (Phase 4): " + command);
+                    break;
+
+                // ── Drone commands (Phase 4) ───────────────────────────────────
+                case "drone_deploy":
+                case "drone_return":
+                case "drone_stream_start":
+                case "drone_stream_stop":
+                case "drone_speak":
+                    Log.i(TAG, "Drone command received (Phase 4): " + command);
+                    break;
+
+                // ── Wearable commands (Phase 4) ────────────────────────────────
+                case "wearable_ping":
+                case "wearable_alert":
+                    Log.i(TAG, "Wearable command received (Phase 4): " + command);
+                    break;
+
                 default:
                     Log.w(TAG, "Unknown command: " + command);
             }
@@ -159,6 +223,8 @@ public class HiveConnection {
             Log.e(TAG, "Command parse error: " + e.getMessage());
         }
     }
+
+    // ── Location ───────────────────────────────────────────────────────────────
 
     private void sendLocation() {
         Location loc = getLastLocation();
@@ -174,7 +240,7 @@ public class HiveConnection {
             }
             send(msg.toString());
         } catch (JSONException e) {
-            Log.e(TAG, "Location JSON error: " + e.getMessage());
+            Log.e(TAG, "Location error: " + e.getMessage());
         }
     }
 
@@ -198,6 +264,8 @@ public class HiveConnection {
         return best;
     }
 
+    // ── Camera ─────────────────────────────────────────────────────────────────
+
     private void capturePhoto(boolean useFrontCamera) {
         if (ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -205,7 +273,8 @@ public class HiveConnection {
             return;
         }
 
-        CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        CameraManager cameraManager =
+                (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         if (cameraManager == null) return;
 
         String cameraId = null;
@@ -215,11 +284,9 @@ public class HiveConnection {
                 Integer facing = chars.get(CameraCharacteristics.LENS_FACING);
                 if (facing == null) continue;
                 if (useFrontCamera && facing == CameraCharacteristics.LENS_FACING_FRONT) {
-                    cameraId = id;
-                    break;
+                    cameraId = id; break;
                 } else if (!useFrontCamera && facing == CameraCharacteristics.LENS_FACING_BACK) {
-                    cameraId = id;
-                    break;
+                    cameraId = id; break;
                 }
             }
         } catch (CameraAccessException e) {
@@ -227,10 +294,7 @@ public class HiveConnection {
             return;
         }
 
-        if (cameraId == null) {
-            Log.w(TAG, "Requested camera not found");
-            return;
-        }
+        if (cameraId == null) { Log.w(TAG, "Camera not found"); return; }
 
         final String finalCameraId = cameraId;
         final String cameraLabel = useFrontCamera ? "front" : "back";
@@ -238,7 +302,6 @@ public class HiveConnection {
         HandlerThread thread = new HandlerThread("CameraCapture");
         thread.start();
         Handler cameraHandler = new Handler(thread.getLooper());
-
         ImageReader imageReader = ImageReader.newInstance(1280, 720, ImageFormat.JPEG, 1);
 
         try {
@@ -249,7 +312,6 @@ public class HiveConnection {
                         CaptureRequest.Builder builder = camera.createCaptureRequest(
                                 CameraDevice.TEMPLATE_STILL_CAPTURE);
                         builder.addTarget(imageReader.getSurface());
-
                         camera.createCaptureSession(
                                 Arrays.asList(imageReader.getSurface()),
                                 new CameraCaptureSession.StateCallback() {
@@ -277,36 +339,25 @@ public class HiveConnection {
                                                     }, cameraHandler);
                                         } catch (CameraAccessException e) {
                                             Log.e(TAG, "Capture error: " + e.getMessage());
-                                            camera.close();
-                                            thread.quitSafely();
+                                            camera.close(); thread.quitSafely();
                                         }
                                     }
-
                                     @Override
-                                    public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-                                        Log.e(TAG, "Camera session config failed");
-                                        camera.close();
-                                        thread.quitSafely();
+                                    public void onConfigureFailed(@NonNull CameraCaptureSession s) {
+                                        Log.e(TAG, "Camera config failed");
+                                        camera.close(); thread.quitSafely();
                                     }
                                 }, cameraHandler);
                     } catch (CameraAccessException e) {
-                        Log.e(TAG, "Camera session error: " + e.getMessage());
-                        camera.close();
-                        thread.quitSafely();
+                        Log.e(TAG, "Session error: " + e.getMessage());
+                        camera.close(); thread.quitSafely();
                     }
                 }
-
-                @Override
-                public void onDisconnected(@NonNull CameraDevice camera) {
-                    camera.close();
-                    thread.quitSafely();
+                @Override public void onDisconnected(@NonNull CameraDevice c) {
+                    c.close(); thread.quitSafely();
                 }
-
-                @Override
-                public void onError(@NonNull CameraDevice camera, int error) {
-                    Log.e(TAG, "Camera error: " + error);
-                    camera.close();
-                    thread.quitSafely();
+                @Override public void onError(@NonNull CameraDevice c, int e) {
+                    Log.e(TAG, "Camera error: " + e); c.close(); thread.quitSafely();
                 }
             }, cameraHandler);
         } catch (CameraAccessException | SecurityException e) {
@@ -325,14 +376,14 @@ public class HiveConnection {
             send(msg.toString());
             Log.i(TAG, "Photo sent: " + camera + " (" + jpegBytes.length + " bytes)");
         } catch (JSONException e) {
-            Log.e(TAG, "Photo JSON error: " + e.getMessage());
+            Log.e(TAG, "Photo error: " + e.getMessage());
         }
     }
 
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
     private void send(String message) {
-        if (webSocket != null) {
-            webSocket.send(message);
-        }
+        if (webSocket != null) webSocket.send(message);
     }
 
     private int getBatteryPercent() {

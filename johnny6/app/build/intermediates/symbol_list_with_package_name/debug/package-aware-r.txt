@@ -708,6 +708,7 @@ id customPanel
 id dashboardView
 id decor_content_parent
 id default_activity_button
+id deviceIdText
 id dialog_button
 id disableHome
 id edit_query
@@ -806,6 +807,7 @@ id view_tree_on_back_pressed_dispatcher_owner
 id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible_removing_fragment_view_tag
+id waitingMessage
 id withText
 id wrap_content
 id youtubeView
@@ -850,6 +852,7 @@ layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_main
+layout activity_waiting
 layout custom_dialog
 layout notification_action
 layout notification_action_tombstone

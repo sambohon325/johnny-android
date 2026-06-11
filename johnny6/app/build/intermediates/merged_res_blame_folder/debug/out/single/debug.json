@@ -1,50 +1,54 @@
 [
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-hdpi_ic_launcher.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-hdpi/ic_launcher.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-hdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xxxhdpi_ic_launcher.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xxxhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xxxhdpi\\ic_launcher_round.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xxhdpi_ic_launcher_round.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xxhdpi/ic_launcher_round.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xhdpi\\ic_launcher_round.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xxhdpi_ic_launcher.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xxhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xxhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/layout_activity_main.xml.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/layout/activity_main.xml"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-mdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xxxhdpi/ic_launcher_round.png"
+        "merged": "com.johnny6.riotdash.app-merged_res-20:/layout_activity_waiting.xml.flat",
+        "source": "com.johnny6.riotdash.app-main-22:/layout/activity_waiting.xml"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-hdpi_ic_launcher_round.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-hdpi/ic_launcher_round.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xxxhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-mdpi_ic_launcher_round.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-mdpi/ic_launcher_round.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/xml_file_paths.xml.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/xml/file_paths.xml"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-hdpi\\ic_launcher_round.png"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-mdpi_ic_launcher.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-mdpi/ic_launcher.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\xml_file_paths.xml.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\xml\\file_paths.xml"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xhdpi_ic_launcher_round.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xhdpi/ic_launcher_round.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\layout\\activity_main.xml"
     },
     {
-        "merged": "com.johnny6.riotdash.app-merged_res-20:/mipmap-xhdpi_ic_launcher.png.flat",
-        "source": "com.johnny6.riotdash.app-main-22:/mipmap-xhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-mdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-merged_res-20:\\mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\sambo\\.gradle\\daemon\\8.0\\com.johnny6.riotdash.app-main-22:\\mipmap-xxhdpi\\ic_launcher_round.png"
     }
 ]
