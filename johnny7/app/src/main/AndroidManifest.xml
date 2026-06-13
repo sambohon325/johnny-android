@@ -7,7 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -19,7 +20,6 @@
         android:label="Johnny 7"
         android:usesCleartextTraffic="true">
 
-        <!-- Minimal activity — just starts service and exits -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,13 +30,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Background service -->
         <service
             android:name=".HiveService"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice|location|camera" />
+            android:foregroundServiceType="location|camera" />
 
-        <!-- Auto-start on boot -->
         <receiver
             android:name=".BootReceiver"
             android:exported="true">
@@ -46,7 +44,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- FileProvider for APK updates -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
