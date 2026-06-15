@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kids Kiosk AAC</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0a1628;
+  --bg2:     #0f1f3d;
+  --bg3:     #162548;
+  --bg4:     #1d2f56;
+  --border:  rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text:    #f0f0f0;
+  --text2:   #9ab0cc;
+  --text3:   #4a6080;
+  --accent:  #f97316;
+  --accent2: #fbbf24;
+  --accent-dim: rgba(249,115,22,0.12);
+  --accent-border: rgba(249,115,22,0.3);
+  --red:     #ef4444;
+  --pro:     #fbbf24;
+}
+html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; height: 100vh; overflow: hidden; }
+.layout { display: flex; height: 100vh; width: 100vw; }
+
+/* Left panel */
+.left-panel { width: 100%; display: flex; flex-direction: column; padding: 12px 10px; overflow-y: auto; gap: 6px; scrollbar-width: none; }
+.left-panel::-webkit-scrollbar { display: none; }
+
+/* Hero */
+.hero { display: flex; align-items: center; gap: 10px; padding: 4px 2px 10px; border-bottom: 1px solid var(--border); margin-bottom: 2px; flex-shrink: 0; }
+.hero-icon { font-size: 32px; line-height: 1; flex-shrink: 0; }
+.hero-name { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
+.hero-name span { color: var(--accent); }
+.hero-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* Tiles */
+.tile { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 0 14px; height: 58px; border-radius: 10px; border: 1px solid transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; user-select: none; flex-shrink: 0; }
+.tile:active { transform: scale(0.97); opacity: 0.85; }
+.tile.active { outline: 2px solid rgba(255,255,255,0.5); outline-offset: 2px; }
+.tile-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
+.tile-yt     { background: rgba(239,68,68,0.15);   border-color: rgba(239,68,68,0.35);   border-left: 3px solid #ef4444; }
+.tile-blue   { background: rgba(37,99,235,0.15);   border-color: rgba(37,99,235,0.35);   border-left: 3px solid #2563eb; }
+.tile-green  { background: rgba(22,163,74,0.15);   border-color: rgba(22,163,74,0.35);   border-left: 3px solid #16a34a; }
+.tile-purple { background: rgba(124,58,237,0.15);  border-color: rgba(124,58,237,0.35);  border-left: 3px solid #7c3aed; }
+.tile-orange { background: rgba(234,88,12,0.15);   border-color: rgba(234,88,12,0.35);   border-left: 3px solid #ea580c; }
+.tile-yellow { background: rgba(202,138,4,0.15);   border-color: rgba(202,138,4,0.35);   border-left: 3px solid #ca8a04; }
+.tile-pink   { background: rgba(219,39,119,0.15);  border-color: rgba(219,39,119,0.35);  border-left: 3px solid #db2777; }
+.tile-teal   { background: rgba(13,148,136,0.15);  border-color: rgba(13,148,136,0.35);  border-left: 3px solid #0d9488; }
+.tile-locked { background: rgba(74,96,128,0.1); border-color: rgba(74,96,128,0.2); border-left: 3px solid #4a6080; color: var(--text3); }
+
+/* Gate toggle */
+.gate-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text3); font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-top: auto; flex-shrink: 0; letter-spacing: 0.05em; text-transform: uppercase; }
+.gate-toggle:active { background: var(--bg3); }
+
+/* Gate overlay */
+.gate-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: flex-end; justify-content: center; }
+.gate-overlay.open { display: flex; }
+.gate-sheet { width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto; background: var(--bg2); border: 1px solid var(--border2); border-bottom: none; border-radius: 16px 16px 0 0; padding: 16px 18px 40px; scrollbar-width: none; }
+.gate-sheet::-webkit-scrollbar { display: none; }
+.gate-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 14px; }
+.gate-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.gate-title { font-size: 14px; font-weight: 700; color: var(--text2); }
+.gate-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; font-weight: 500; }
+.gate-lock-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.gate-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); font-size: 16px; font-family: inherit; font-weight: 600; outline: none; }
+.gate-input:focus { border-color: var(--accent); }
+.gate-btn { width: 100%; padding: 10px 18px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.gate-btn:active { opacity: 0.85; }
+.gate-btn.secondary { background: transparent; border: 1px solid var(--border2); color: var(--text2); margin-bottom: 4px; }
+.gate-btn.pro-btn { background: var(--pro); color: #000; }
+.gate-error { color: var(--red); font-size: 12px; margin-bottom: 8px; display: none; }
+
+/* Section labels */
+.section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* Discord card */
+.discord-card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 10px; background: var(--bg3); border: 1px solid rgba(88,101,242,0.3); cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: 8px; }
+.discord-card:active { background: var(--bg4); }
+.discord-icon { font-size: 20px; flex-shrink: 0; }
+.discord-text { flex: 1; }
+.discord-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.discord-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Pro upsell card */
+.pro-card { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.25); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.pro-card-title { font-size: 13px; font-weight: 700; color: var(--pro); margin-bottom: 6px; }
+.pro-card-features { font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 12px; }
+.pro-card-features li { list-style: none; padding-left: 1.2em; position: relative; }
+.pro-card-features li::before { content: "✓"; position: absolute; left: 0; color: var(--pro); }
+
+/* Slot editors */
+.url-hint { font-size: 11px; color: var(--text3); line-height: 1.5; margin-bottom: 10px; }
+.slot-editor { margin-bottom: 6px; border-radius: 8px; overflow: hidden; background: var(--bg3); border: 1px solid var(--border); }
+.slot-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text2); -webkit-tap-highlight-color: transparent; }
+.slot-header:active { background: var(--bg4); }
+.slot-body { display: none; padding: 4px 14px 14px; }
+.slot-body.open { display: block; }
+.field-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.field-input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg4); color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+.field-input:focus { border-color: var(--accent); }
+.field-select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg4); color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+
+/* Type tabs */
+.type-tabs { display: flex; gap: 4px; margin-top: 8px; }
+.type-tab { flex: 1; padding: 6px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; }
+.type-tab.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+
+.color-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.color-swatch { width: 28px; height: 28px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
+.color-swatch.selected { border-color: #fff; }
+.emoji-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.emoji-opt { width: 34px; height: 34px; border-radius: 6px; border: 1px solid transparent; background: var(--bg4); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.emoji-opt.selected { border-color: var(--accent); background: var(--accent-dim); }
+.save-btn { width: 100%; margin-top: 14px; padding: 12px; border-radius: 8px; border: 1px solid var(--accent-border); background: var(--accent-dim); color: var(--accent); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.save-btn:active { opacity: 0.75; }
+
+/* App picker modal */
+.app-picker { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); display: none; flex-direction: column; }
+.app-picker.open { display: flex; }
+.app-picker-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.app-picker-title { font-size: 15px; font-weight: 700; }
+.app-picker-close { background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 6px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.app-picker-search { padding: 10px 18px; }
+.app-picker-search input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); font-size: 14px; outline: none; }
+.app-list { flex: 1; overflow-y: auto; padding: 0 18px 20px; }
+.app-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.app-item:active { opacity: 0.7; }
+.app-item-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.app-item-name { font-size: 13px; font-weight: 500; }
+.app-item-pkg { font-size: 11px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="left-panel" id="leftPanel">
+    <div class="hero">
+      <div class="hero-icon">🏪</div>
+      <div>
+        <div class="hero-name">Kids <span>Kiosk</span></div>
+        <div class="hero-sub" id="heroSub"></div>
+      </div>
+    </div>
+
+    <button class="tile tile-yt" onclick="openUrl('https://www.youtube.com/', this)">
+      <span class="tile-icon">📺</span> YouTube
+    </button>
+    <button id="tile1" class="tile tile-blue"   onclick="tileClick(1,this)"><span class="tile-icon" id="icon1">🕷️</span><span id="label1">Spiderman</span></button>
+    <button id="tile2" class="tile tile-green"  onclick="tileClick(2,this)"><span class="tile-icon" id="icon2">🏎️</span><span id="label2">Cars</span></button>
+    <button id="tile3" class="tile tile-purple" onclick="tileClick(3,this)"><span class="tile-icon" id="icon3">🌊</span><span id="label3">Moana</span></button>
+    <button id="tile4" class="tile tile-orange" onclick="tileClick(4,this)"><span class="tile-icon" id="icon4">🏁</span><span id="label4">Racing</span></button>
+    <!-- Slots 5-8: Pro only -->
+    <button id="tile5" class="tile tile-locked" onclick="proOnly(5,this)"><span class="tile-icon" id="icon5">🔒</span><span id="label5">Pro only</span></button>
+    <button id="tile6" class="tile tile-locked" onclick="proOnly(6,this)"><span class="tile-icon" id="icon6">🔒</span><span id="label6">Pro only</span></button>
+    <button id="tile7" class="tile tile-locked" onclick="proOnly(7,this)"><span class="tile-icon" id="icon7">🔒</span><span id="label7">Pro only</span></button>
+    <button id="tile8" class="tile tile-locked" onclick="proOnly(8,this)"><span class="tile-icon" id="icon8">🔒</span><span id="label8">Pro only</span></button>
+
+    <button class="gate-toggle" onclick="openGate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Caretaker Gate
+    </button>
+  </div>
+</div>
+
+<!-- Gate overlay -->
+<div class="gate-overlay" id="gateOverlay" onclick="overlayClick(event)">
+  <div class="gate-sheet">
+    <div class="gate-handle"></div>
+    <div class="gate-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#9ab0cc" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="gate-title">Caretaker Gate</div>
+    </div>
+
+    <div id="lockScreen">
+      <span class="gate-label" id="mathQuestion"></span>
+      <div class="gate-lock-row">
+        <input class="gate-input" type="number" id="mathInput" placeholder="Your answer" />
+        <button class="gate-btn" onclick="checkAnswer()">Unlock</button>
+      </div>
+      <div class="gate-error" id="gateError">Wrong answer &mdash; try again</div>
+    </div>
+
+    <div id="unlockedScreen" style="display:none;">
+      <button class="gate-btn secondary" onclick="lockGate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Lock &amp; close
+      </button>
+
+      <!-- Discord community -->
+      <div class="section-label">Community</div>
+      <div class="discord-card" onclick="openDiscord()">
+        <div class="discord-icon">💬</div>
+        <div class="discord-text">
+          <div class="discord-title">Join our Discord community</div>
+          <div class="discord-sub">Get help, share tips, recommended apps for kids</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a6080" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <!-- Pro upsell (shown if not pro) -->
+      <div id="proUpsell">
+        <div class="section-label">Upgrade to Pro</div>
+        <div class="pro-card">
+          <div class="pro-card-title">✨ Kids Kiosk Pro</div>
+          <ul class="pro-card-features">
+            <li>8 buttons (4 more slots)</li>
+            <li>Launch any installed app</li>
+            <li>All colors &amp; icons</li>
+            <li>One-time purchase — no subscription</li>
+          </ul>
+          <button class="gate-btn pro-btn" onclick="doPurchase()">Unlock Pro &mdash; $3.99</button>
+        </div>
+      </div>
+
+      <!-- Button settings -->
+      <div class="section-label">Button settings</div>
+      <div class="url-hint" id="urlHint">YouTube links work great. Pro users can also launch any app.</div>
+      <div id="slotEditors"></div>
+      <button class="save-btn" onclick="saveConfig()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- App picker modal -->
+<div class="app-picker" id="appPicker">
+  <div class="app-picker-header">
+    <span class="app-picker-title">Choose an app</span>
+    <button class="app-picker-close" onclick="closeAppPicker()">Cancel</button>
+  </div>
+  <div class="app-picker-search">
+    <input type="text" id="appSearch" placeholder="Search apps..." oninput="filterApps()" />
+  </div>
+  <div class="app-list" id="appList"></div>
+</div>
+
+<script>
+var isPro = false;
+var installedApps = [];
+var currentAppSlot = -1;
+var activeBtn = null;
+var mathA, mathB;
+
+var COLOR_MAP = {
+  blue:   {hex:'#2563eb',cls:'tile-blue'},
+  green:  {hex:'#16a34a',cls:'tile-green'},
+  purple: {hex:'#7c3aed',cls:'tile-purple'},
+  orange: {hex:'#ea580c',cls:'tile-orange'},
+  yellow: {hex:'#ca8a04',cls:'tile-yellow'},
+  pink:   {hex:'#db2777',cls:'tile-pink'},
+  teal:   {hex:'#0d9488',cls:'tile-teal'},
+  red:    {hex:'#ef4444',cls:'tile-yt'},
+};
+var EMOJIS = ['🕷️','🏎️','🏁','✨','🎵','📺','🦖','🦸','🚀','🎮','🧱','🐾','💥','🎈','🌊','🎢','💦','🏖️','🦕','🎪','📚','🎨','🎭','🎵','🌟'];
+var QUOTES = ['Ready to explore?','What will we discover today?','Let\'s have fun!','Your adventure starts here!'];
+
+// Default config — 8 slots, first 4 available free
+var DEFAULT_SLOTS = [
+  {name:'Spiderman',     url:'https://www.youtube.com/results?search_query=spiderman+cartoon', color:'blue',   emoji:'🕷️', type:'url'},
+  {name:'Cars',          url:'https://www.youtube.com/results?search_query=cars+pixar+movie',  color:'green',  emoji:'🏎️', type:'url'},
+  {name:'Moana',         url:'https://www.youtube.com/results?search_query=moana+disney',       color:'purple', emoji:'🌊', type:'url'},
+  {name:'Racing',        url:'https://www.youtube.com/results?search_query=racing+game+clips',  color:'orange', emoji:'🏁', type:'url'},
+  {name:'Button 5',      url:'', color:'green',  emoji:'🧱', type:'url'},
+  {name:'Button 6',      url:'', color:'yellow', emoji:'✨', type:'url'},
+  {name:'Button 7',      url:'', color:'pink',   emoji:'🎢', type:'url'},
+  {name:'Button 8',      url:'', color:'teal',   emoji:'💦', type:'url'},
+];
+
+var slots = JSON.parse(localStorage.getItem('kioskSlots') || 'null') || DEFAULT_SLOTS;
+
+function newMath() {
+  mathA = Math.floor(Math.random()*6)+3;
+  mathB = Math.floor(Math.random()*6)+3;
+  document.getElementById('mathQuestion').textContent = 'What is ' + mathA + ' \xd7 ' + mathB + '?';
+}
+
+window.onload = function() {
+  document.getElementById('heroSub').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  newMath();
+
+  // Check pro status from Android
+  try { isPro = window.KioskBridge && KioskBridge.isPro(); } catch(e) {}
+
+  renderSlots();
+};
+
+function renderSlots() {
+  for(var i=0;i<8;i++) {
+    var s = slots[i]; var idx = i+1;
+    var tile = document.getElementById('tile'+idx);
+    var isLocked = i>=4 && !isPro;
+
+    document.getElementById('label'+idx).textContent = isLocked ? 'Pro only' : s.name;
+    document.getElementById('icon'+idx).textContent = isLocked ? '🔒' : s.emoji;
+
+    // Remove all color classes
+    Object.values(COLOR_MAP).forEach(function(c){ tile.classList.remove(c.cls); });
+    tile.classList.remove('tile-locked');
+
+    if(isLocked) {
+      tile.classList.add('tile-locked');
+      tile.onclick = function(){ proOnly(); };
+    } else {
+      tile.classList.add((COLOR_MAP[s.color]||COLOR_MAP.blue).cls);
+      (function(slotIdx){ tile.onclick = function(){ tileClick(slotIdx, tile); }; })(idx);
+    }
+  }
+}
+
+function tileClick(idx, btn) {
+  var s = slots[idx-1];
+  if(!s || !s.url) return;
+  if(activeBtn) activeBtn.classList.remove('active');
+  activeBtn = btn; btn.classList.add('active');
+
+  if(s.type === 'app') {
+    try { KioskBridge.launchAppFromJs(s.url); } catch(e) { window.location.href = 'app://'+s.url; }
+  } else {
+    window.location.href = s.url;
+  }
+}
+
+function openUrl(url, btn) {
+  if(activeBtn) activeBtn.classList.remove('active');
+  activeBtn = btn; btn.classList.add('active');
+  window.location.href = url;
+}
+
+function proOnly() {
+  openGate();
+  // After gate opens, scroll to pro section
+  setTimeout(function(){
+    var el = document.getElementById('proUpsell');
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  }, 400);
+}
+
+// ── Gate ──────────────────────────────────────────────────────────────────────
+function openGate() { document.getElementById('gateOverlay').classList.add('open'); }
+function overlayClick(e) { if(e.target===document.getElementById('gateOverlay')) lockGate(); }
+
+function checkAnswer() {
+  var ans = parseInt(document.getElementById('mathInput').value);
+  if(ans === mathA*mathB) {
+    document.getElementById('lockScreen').style.display='none';
+    document.getElementById('unlockedScreen').style.display='block';
+    document.getElementById('gateError').style.display='none';
+    // Show/hide pro upsell
+    document.getElementById('proUpsell').style.display = isPro ? 'none' : 'block';
+    buildSlotEditors();
+    // Load installed apps if pro
+    if(isPro) loadInstalledApps();
+  } else { document.getElementById('gateError').style.display='block'; }
+}
+
+function lockGate() {
+  document.getElementById('lockScreen').style.display='block';
+  document.getElementById('unlockedScreen').style.display='none';
+  document.getElementById('mathInput').value='';
+  document.getElementById('gateOverlay').classList.remove('open');
+  newMath();
+}
+
+// ── Discord ────────────────────────────────────────────────────────────────────
+function openDiscord() {
+  try { KioskBridge.openDiscord(); } catch(e) {
+    window.open('https://discord.com/channels/1516172867119612014/1516172869837787178','_blank');
+  }
+}
+
+// ── Pro purchase ───────────────────────────────────────────────────────────────
+function doPurchase() {
+  try { KioskBridge.unlockPro(); }
+  catch(e) { alert('Purchase not available in this version.'); }
+}
+
+function onProUnlocked() {
+  isPro = true;
+  document.getElementById('proUpsell').style.display='none';
+  renderSlots();
+  buildSlotEditors();
+  loadInstalledApps();
+}
+
+// ── Slot editors ───────────────────────────────────────────────────────────────
+function loadInstalledApps() {
+  try {
+    var json = KioskBridge.getInstalledApps();
+    installedApps = JSON.parse(json);
+    installedApps.sort(function(a,b){ return a.label.localeCompare(b.label); });
+  } catch(e) { installedApps = []; }
+}
+
+function buildSlotEditors() {
+  var c = document.getElementById('slotEditors'); c.innerHTML='';
+  var maxSlots = isPro ? 8 : 4;
+  for(var i=0;i<maxSlots;i++){
+    var s=slots[i];
+    var swatches=Object.entries(COLOR_MAP).map(function(e){
+      return '<div class="color-swatch'+(s.color===e[0]?' selected':'')+'" style="background:'+e[1].hex+';" onclick="selectColor('+i+',\''+e[0]+'\',this)"></div>';
+    }).join('');
+    var emojis=EMOJIS.map(function(em){
+      return '<div class="emoji-opt'+(s.emoji===em?' selected':'')+'" onclick="selectEmoji('+i+',\''+em+'\',this)">'+em+'</div>';
+    }).join('');
+    var typeUrl = s.type==='app'?'':'active';
+    var typeApp = s.type==='app'?'active':'';
+    var urlField = '<div class="field-label">YouTube or web URL</div><input class="field-input" id="slotUrl'+i+'" value="'+(s.type!=='app'?s.url:'')+'" placeholder="https://youtube.com/..." />';
+    var appField = '<div class="field-label">App</div>'
+      + (isPro
+        ? '<div style="display:flex;gap:6px;align-items:center;"><input class="field-input" id="slotPkg'+i+'" value="'+(s.type==='app'?s.url:'')+'" placeholder="e.g. com.pbskids.video" style="flex:1" />'
+          + '<button class="gate-btn" style="width:auto;padding:8px 12px;font-size:12px;" onclick="openAppPicker('+i+')">Browse</button></div>'
+        : '<div style="color:var(--text3);font-size:12px;padding:8px 0;">App launching requires Pro</div>');
+
+    c.innerHTML+='<div class="slot-editor">'
+      +'<div class="slot-header" onclick="toggleSlot('+i+')"><span>Button '+(i+1)+' &mdash; '+s.name+'</span><span style="color:#4a6080;font-size:11px;">\u25bc</span></div>'
+      +'<div class="slot-body" id="slotBody'+i+'">'
+      +'<div class="field-label">Label</div><input class="field-input" id="slotName'+i+'" value="'+s.name+'" />'
+      +(isPro?'<div class="type-tabs"><button class="type-tab '+typeUrl+'" onclick="setType('+i+',\'url\',this)">URL</button><button class="type-tab '+typeApp+'" onclick="setType('+i+',\'app\',this)">App</button></div>':'')
+      +'<div id="urlSection'+i+'" style="display:'+(s.type==='app'?'none':'block')+'">'+urlField+'</div>'
+      +'<div id="appSection'+i+'" style="display:'+(s.type==='app'?'block':'none')+'">'+appField+'</div>'
+      +'<div class="field-label">Colour</div><div class="color-row" id="colorRow'+i+'">'+swatches+'</div>'
+      +'<div class="field-label">Icon</div><div class="emoji-row">'+emojis+'</div>'
+      +'</div></div>';
+  }
+}
+
+function setType(i, type, el) {
+  slots[i].type = type;
+  el.parentElement.querySelectorAll('.type-tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('urlSection'+i).style.display = type==='app'?'none':'block';
+  document.getElementById('appSection'+i).style.display = type==='app'?'block':'none';
+}
+
+function toggleSlot(i) { document.getElementById('slotBody'+i).classList.toggle('open'); }
+function selectColor(i,key,el) {
+  slots[i].color=key;
+  el.closest('.color-row').querySelectorAll('.color-swatch').forEach(function(s){s.classList.remove('selected');});
+  el.classList.add('selected');
+}
+function selectEmoji(i,em,el) {
+  slots[i].emoji=em;
+  el.closest('.emoji-row').querySelectorAll('.emoji-opt').forEach(function(e){e.classList.remove('selected');});
+  el.classList.add('selected');
+}
+function saveConfig() {
+  var maxSlots = isPro ? 8 : 4;
+  for(var i=0;i<maxSlots;i++){
+    slots[i].name = document.getElementById('slotName'+i).value;
+    if(slots[i].type==='app') {
+      var pkgEl = document.getElementById('slotPkg'+i);
+      slots[i].url = pkgEl ? pkgEl.value : '';
+    } else {
+      slots[i].url = document.getElementById('slotUrl'+i).value;
+    }
+  }
+  localStorage.setItem('kioskSlots',JSON.stringify(slots));
+  renderSlots();
+  buildSlotEditors();
+  lockGate();
+}
+
+// ── App picker ─────────────────────────────────────────────────────────────────
+function openAppPicker(slotIdx) {
+  currentAppSlot = slotIdx;
+  document.getElementById('appSearch').value='';
+  renderAppList(installedApps);
+  document.getElementById('appPicker').classList.add('open');
+}
+
+function closeAppPicker() {
+  document.getElementById('appPicker').classList.remove('open');
+  currentAppSlot = -1;
+}
+
+function renderAppList(apps) {
+  var list = document.getElementById('appList');
+  list.innerHTML = apps.map(function(app){
+    return '<div class="app-item" onclick="selectApp(\''+app.packageName+'\',\''+app.label.replace(/'/g,"\\'")+'\')">'
+      +'<div class="app-item-icon">📱</div>'
+      +'<div><div class="app-item-name">'+app.label+'</div><div class="app-item-pkg">'+app.packageName+'</div></div>'
+      +'</div>';
+  }).join('') || '<div style="padding:20px;color:var(--text3);font-size:13px;">No apps found</div>';
+}
+
+function filterApps() {
+  var q = document.getElementById('appSearch').value.toLowerCase();
+  renderAppList(installedApps.filter(function(a){ return a.label.toLowerCase().includes(q) || a.packageName.toLowerCase().includes(q); }));
+}
+
+function selectApp(packageName, label) {
+  if(currentAppSlot<0) return;
+  slots[currentAppSlot].url = packageName;
+  slots[currentAppSlot].type = 'app';
+  slots[currentAppSlot].name = label;
+  closeAppPicker();
+  buildSlotEditors();
+}
+</script>
+</body>
+</html>
