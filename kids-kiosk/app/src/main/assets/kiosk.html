@@ -31,16 +31,17 @@ html, body { background: transparent !important; color: var(--text); font-family
 body { overflow: hidden; }
 .drawer-tab {
   position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-  width: 32px; height: 64px;
-  background: #33C5E8; border-radius: 0 10px 10px 0;
+  width: 40px; height: 80px;
+  background: #33C5E8; border-radius: 0 14px 14px 0;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; z-index: 400;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.5);
+  box-shadow: 3px 0 16px rgba(0,0,0,0.6);
   -webkit-tap-highlight-color: transparent;
   pointer-events: all;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-left: none;
 }
-.tab-arrow { color: #000; font-size: 18px; font-weight: 900; line-height: 1; transition: transform 0.25s; }
-.drawer-tab.open .tab-arrow { transform: scaleX(-1); }
+.tab-arrow { color: #000; font-size: 22px; font-weight: 900; line-height: 1; }
 
 .drawer {
   position: fixed; left: -280px; top: 0; bottom: 0; width: 280px;
@@ -170,8 +171,8 @@ body { overflow: hidden; }
 </head>
 <body>
 <!-- Pull tab -->
-<div class="drawer-tab" id="drawerTab" onclick="openDrawer()">
-  <span class="tab-arrow" id="tabArrow">&#x276F;</span>
+<div class="drawer-tab" id="drawerTab" onclick="toggleDrawer()">
+  <span id="tabArrow" style="color:#000;font-size:26px;font-weight:900;line-height:1;">&#x276F;</span>
 </div>
 
 <!-- Backdrop -->
@@ -576,15 +577,23 @@ function checkExitGate(){
   }
 }
 
+function toggleDrawer() {
+  var isOpen = document.getElementById('drawer').classList.contains('open');
+  if (isOpen) { closeDrawer(); } else { openDrawer(); }
+}
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBackdrop').classList.add('open');
   document.getElementById('drawerTab').classList.add('open');
+  document.getElementById('tabArrow').textContent = '❮';
+  try { KioskBridge.expandOverlay(); } catch(e) {}
 }
 function closeDrawer() {
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('drawerBackdrop').classList.remove('open');
   document.getElementById('drawerTab').classList.remove('open');
+  document.getElementById('tabArrow').textContent = '❯';
+  try { KioskBridge.shrinkOverlay(); } catch(e) {}
 }
 
 </script>

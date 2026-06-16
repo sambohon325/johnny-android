@@ -217,6 +217,24 @@ public class OverlayService extends Service {
         }
 
         @JavascriptInterface
+        public void expandOverlay() {
+            // Expand to full screen when drawer opens so backdrop catches all taps
+            kioskView.post(() -> {
+                overlayParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                try { windowManager.updateViewLayout(kioskView, overlayParams); } catch (Exception e) {}
+            });
+        }
+
+        @JavascriptInterface
+        public void shrinkOverlay() {
+            // Shrink back to 300dp when drawer closes
+            kioskView.post(() -> {
+                overlayParams.width = dpToPx(300);
+                try { windowManager.updateViewLayout(kioskView, overlayParams); } catch (Exception e) {}
+            });
+        }
+
+        @JavascriptInterface
         public void exitKioskMode() {
             Intent i = new Intent(OverlayService.this, MainActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
