@@ -5,7 +5,7 @@
     android:background="#0a1628">
 
     <WebView
-        android:id="@+id/kioskView"
+        android:id="@+id/setupView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

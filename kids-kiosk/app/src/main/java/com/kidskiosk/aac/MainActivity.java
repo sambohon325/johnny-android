@@ -1,35 +1,25 @@
 package com.kidskiosk.aac;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private WebView kioskView;
+    private WebView setupView;
+    private static final int OVERLAY_PERMISSION_REQUEST = 1001;
     private static final String PREFS_NAME = "kids_kiosk";
     private static final String KEY_PRO = "is_pro_unlocked";
 
@@ -42,51 +32,27 @@ public class MainActivity extends AppCompatActivity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
-        hideSystemUI();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_main);
-        kioskView = findViewById(R.id.kioskView);
+        setupView = findViewById(R.id.setupView);
         setupWebView();
-        kioskView.loadUrl("file:///android_asset/kiosk.html");
+        setupView.loadUrl("file:///android_asset/setup.html");
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
-        WebSettings s = kioskView.getSettings();
+        WebSettings s = setupView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
-        s.setMediaPlaybackRequiresUserGesture(false);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        kioskView.setWebChromeClient(new WebChromeClient());
-        kioskView.setOnLongClickListener(v -> true);
-        kioskView.setLongClickable(false);
-
-        // JavaScript bridge
-        kioskView.addJavascriptInterface(new KioskBridge(), "KioskBridge");
-
-        kioskView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
-                String url = req.getUrl().toString();
-
-                // App launch scheme: app://com.package.name
-                if (url.startsWith("app://")) {
-                    String packageName = url.substring(6);
-                    launchApp(packageName);
-                    return true;
-                }
-
-                // External URLs — open in WebView (YouTube etc)
-                return false;
-            }
-        });
+        setupView.setWebChromeClient(new WebChromeClient());
+        setupView.addJavascriptInterface(new SetupBridge(), "SetupBridge");
+        setupView.setWebViewClient(new WebViewClient());
     }
 
-    // ── JavaScript Bridge ──────────────────────────────────────────────────────
-
-    public class KioskBridge {
+    public class SetupBridge {
 
         @JavascriptInterface
         public boolean isPro() {
@@ -96,113 +62,98 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public String getInstalledApps() {
-            // Returns JSON array of {packageName, label} for user-installed apps
             try {
-                PackageManager pm = getPackageManager();
-                List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                JSONArray result = new JSONArray();
-
-                for (ApplicationInfo app : apps) {
-                    // Only include apps that have a launcher icon (user-facing apps)
+                android.content.pm.PackageManager pm = getPackageManager();
+                java.util.List<android.content.pm.ApplicationInfo> apps =
+                    pm.getInstalledApplications(android.content.pm.PackageManager.GET_META_DATA);
+                org.json.JSONArray result = new org.json.JSONArray();
+                for (android.content.pm.ApplicationInfo app : apps) {
                     if (pm.getLaunchIntentForPackage(app.packageName) != null
                             && !app.packageName.equals(getPackageName())) {
-                        JSONObject obj = new JSONObject();
+                        org.json.JSONObject obj = new org.json.JSONObject();
                         obj.put("packageName", app.packageName);
                         obj.put("label", pm.getApplicationLabel(app).toString());
                         result.put(obj);
                     }
                 }
                 return result.toString();
-            } catch (Exception e) {
-                return "[]";
-            }
-        }
-
-        @JavascriptInterface
-        public void launchAppFromJs(String packageName) {
-            launchApp(packageName);
-        }
-
-        @JavascriptInterface
-        public void openDiscord() {
-            Intent intent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://discord.com/channels/1516172867119612014/1516172869837787178"));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            } catch (Exception e) { return "[]"; }
         }
 
         @JavascriptInterface
         public void unlockPro() {
-            // TODO: Replace with real Google Play Billing check
-            // For now this is a placeholder — real IAP goes here
             getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .edit()
-                    .putBoolean(KEY_PRO, true)
-                    .apply();
+                    .edit().putBoolean(KEY_PRO, true).apply();
             runOnUiThread(() ->
-                kioskView.evaluateJavascript("onProUnlocked()", null));
+                setupView.evaluateJavascript("onProUnlocked()", null));
         }
-    }
 
-    // ── App launching ──────────────────────────────────────────────────────────
-
-    private void launchApp(String packageName) {
-        PackageManager pm = getPackageManager();
-        Intent intent = pm.getLaunchIntentForPackage(packageName);
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        } else {
-            // App not installed — open Play Store
-            try {
-                Intent store = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=" + packageName));
-                store.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(store);
-            } catch (Exception e) {
-                Intent web = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
-                web.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(web);
+        @JavascriptInterface
+        public void launchKiosk() {
+            // Check overlay permission first
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && !Settings.canDrawOverlays(MainActivity.this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST);
+            } else {
+                startKioskOverlay();
             }
         }
+
+        @JavascriptInterface
+        public void openScreenPinning() {
+            // Open Android security settings where screen pinning lives
+            Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+
+        @JavascriptInterface
+        public String getSlotsJson() {
+            // Pass saved slots to setup screen
+            return getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getString("slots_json", "null");
+        }
     }
 
-    // ── System UI ──────────────────────────────────────────────────────────────
+    private void startKioskOverlay() {
+        Intent service = new Intent(this, OverlayService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(service);
+        } else {
+            startService(service);
+        }
+        // Move app to background so the overlay shows on top of home screen
+        moveTaskToBack(true);
+    }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) return true;
-        return super.onKeyDown(keyCode, event);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OVERLAY_PERMISSION_REQUEST) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && Settings.canDrawOverlays(this)) {
+                startKioskOverlay();
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        hideSystemUI();
-        if (kioskView != null) kioskView.onResume();
+        if (setupView != null) setupView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (kioskView != null) kioskView.onPause();
-    }
-
-    private void hideSystemUI() {
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN
-        );
+        if (setupView != null) setupView.onPause();
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) hideSystemUI();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) return true;
+        return super.onKeyDown(keyCode, event);
     }
 }
